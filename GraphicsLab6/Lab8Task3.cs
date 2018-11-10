@@ -15,7 +15,6 @@ namespace GraphicsLab6
     {
         Camera cam;
         private Form1 parent;
-        private Polyhedron baseFigure;
         private bool stop;
         public Lab8Task3()
         {
@@ -31,6 +30,7 @@ namespace GraphicsLab6
 
         private void Lab8Task3_Load(object sender, EventArgs e)
         {
+
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -38,28 +38,26 @@ namespace GraphicsLab6
             double ud = double.Parse(textBox1.Text);
             double lr = double.Parse(textBox2.Text);
 
-            cam.upDownLeftRight(ud, lr);
+            cam.UpDownLeftRight(ud, lr);
 
             foreach (var x in parent.figure.vertexes)
-            {
                 x.MultiplyByMatrixTask8(cam.projection);
-            }
 
             parent.DrawPolyhedronLab8(parent.figure, parent.pictureBox1Size);
         }
+
 
         private async void button2_Click(object sender, EventArgs e)
         {
             stop = false;
             while (!stop)
             {
-                cam.upDownLeftRight(2, 2);
+                cam.UpDownLeftRight(2, 2);
                 foreach (var x in parent.figure.vertexes)
-                {
                     x.MultiplyByMatrixTask8(cam.projection);
-                }
+
                 parent.DrawPolyhedronLab8(parent.figure, parent.pictureBox1Size);
-                await Task.Delay(100);
+                await Task.Delay(50);
             }
         }
 
@@ -84,7 +82,7 @@ namespace GraphicsLab6
             this.coords = coords;
         }
 
-        private List<List<double>> multMatrix(List<List<double>> m1, List<List<double>> m2)
+        private List<List<double>> MultMatrix(List<List<double>> m1, List<List<double>> m2)
         {
             var res = new List<List<double>>() { };
             for (int i = 0; i < m1.Count; i++)
@@ -101,7 +99,7 @@ namespace GraphicsLab6
             return res;
         }
 
-        public void init()
+        public void GetMatrix()
         {
             double ud = Math.PI / 180 * upDown;
             double lr = Math.PI / 180 * leftRight;
@@ -122,9 +120,9 @@ namespace GraphicsLab6
                 new List<double> {0, 0, 0, 0 },
                 new List<double> {0, 0, 0, 1 }
             };
-            projection = multMatrix(multMatrix(d2, d1), d3);
+            projection = MultMatrix(MultMatrix(d2, d1), d3);
 
-            var temp = multMatrix(projection, new List < List<double> > {
+            var temp = MultMatrix(projection, new List < List<double> > {
                 new List<double> { coords.X },
                 new List<double>  { coords.Y },
                 new List<double>  { coords.Z },
@@ -133,11 +131,11 @@ namespace GraphicsLab6
             viewVector = new Point3D(coords.X, coords.Y , coords.Z );
         }
 
-        public void upDownLeftRight(double ud, double lr)
+        public void UpDownLeftRight(double ud, double lr)
         {
             upDown += ud;
             leftRight += lr;
-            init();
+            GetMatrix();
         }
     }
 }
