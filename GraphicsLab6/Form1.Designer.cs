@@ -180,6 +180,7 @@
             this.lab8Task3Button.TabIndex = 13;
             this.lab8Task3Button.Text = "lab8Task3";
             this.lab8Task3Button.UseVisualStyleBackColor = true;
+            this.lab8Task3Button.Click += new System.EventHandler(this.lab8Task3Button_Click);
             // 
             // Form1
             // 

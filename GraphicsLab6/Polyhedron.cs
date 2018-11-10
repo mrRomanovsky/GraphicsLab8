@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GraphicsLab6
 {
-    enum PolyhedronType
+    public enum PolyhedronType
     {
         Tetrahedron,
         Hexahedron,
@@ -16,7 +16,7 @@ namespace GraphicsLab6
         Dodecahedron
     };
 
-    static class SchlafliSymbol
+    public static class SchlafliSymbol
     {
         static public Dictionary<string, Tuple<int, int>> schlafliSymbol = new Dictionary<string, Tuple<int, int>>
         {
@@ -29,7 +29,7 @@ namespace GraphicsLab6
     }
     
 
-    class Polyhedron
+    public class Polyhedron
     {
         public int CountVertex;
         public int CountSegment;
@@ -38,7 +38,9 @@ namespace GraphicsLab6
         public PointF CentrePoint;
         public int SegmentLength;
         public List<Point3D> vertexes;
-        public Point3D Centre { get; private set; }
+        private Polyhedron figure;
+
+        public Point3D Centre { get; set; }
 
         public Polyhedron(PolyhedronType type, int len)
         {
@@ -61,6 +63,11 @@ namespace GraphicsLab6
                     BuildOctahedron(len);
                     break;
             }
+        }
+
+        public Polyhedron(Polyhedron figure)
+        {
+            
         }
 
         //angle - в радианах!
@@ -181,8 +188,16 @@ namespace GraphicsLab6
                 vertexes[i].AddNeighbour(vertexes[i + 4]);
                 vertexes[i + 4].AddNeighbour(vertexes[i]);
             }
-
-            Centre = new Point3D(len / 2, len / 2, len / 2);
+            double xSum = 0;
+            double ySum = 0;
+            double zSum = 0;
+            foreach(var item in vertexes)
+            {
+                xSum += item.X;
+                ySum += item.Y;
+                zSum += item.Z;
+            }
+            Centre = new Point3D(xSum / 8, ySum / 8, zSum / 8);
         }
         #endregion
 
