@@ -162,6 +162,7 @@
             this.lab8Task1Button.TabIndex = 11;
             this.lab8Task1Button.Text = "lab8Task1";
             this.lab8Task1Button.UseVisualStyleBackColor = true;
+            this.lab8Task1Button.Click += new System.EventHandler(this.lab8Task1Button_Click);
             // 
             // lab8Task2Button
             // 
