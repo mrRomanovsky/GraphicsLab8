@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GraphicsLab6
 {
-    enum PolyhedronType
+    public enum PolyhedronType
     {
         Tetrahedron,
         Hexahedron,
@@ -16,7 +16,7 @@ namespace GraphicsLab6
         Dodecahedron
     };
 
-    static class SchlafliSymbol
+   public static class SchlafliSymbol
     {
         static public Dictionary<string, Tuple<int, int>> schlafliSymbol = new Dictionary<string, Tuple<int, int>>
         {
@@ -29,7 +29,7 @@ namespace GraphicsLab6
     }
     
 
-    class Polyhedron
+    public class Polyhedron
     {
         public int CountVertex;
         public int CountSegment;
@@ -39,6 +39,7 @@ namespace GraphicsLab6
         public int SegmentLength;
         public List<Point3D> vertexes;
         public Point3D Centre { get; private set; }
+        public List<Edge> edges;
 
         public Polyhedron(PolyhedronType type, int len)
         {
