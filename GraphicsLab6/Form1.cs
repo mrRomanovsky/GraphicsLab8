@@ -828,6 +828,14 @@ namespace GraphicsLab6
         #endregion
 
         #region lab7
+        private Point3D VectorProduct(Point3D vector1, Point3D vector2)
+        {
+            double newX = vector1.Y * vector2.Z - vector1.Z * vector2.Y;
+            double newY = vector1.X * vector2.Z - vector1.Z * vector2.X;
+            double newZ = vector1.X * vector2.Y - vector1.Y * vector2.X;
+            return new Point3D(newX, newY, newZ);
+        }
+
         private void ReadPolyhedronFromFile(string filepath)
         {
             var edgesLines = File.ReadAllLines(filepath);
@@ -1055,7 +1063,7 @@ namespace GraphicsLab6
             }
             foreach (var figure in figures)
             {
-                foreach (var e in figure.edges)
+                foreach (var e in figure.Edges)
                 {
                     e.GetEquationPlans();
                     var z0 = e.Vertexes.First().Z;
@@ -1089,5 +1097,157 @@ namespace GraphicsLab6
         #endregion
         #endregion
 
+
+        private Point3D VectorFromZeroCoords(Point3D vectorStart, Point3D vectorEnd) =>
+            new Point3D(vectorEnd.X - vectorStart.X, vectorEnd.Y - vectorStart.Y, vectorEnd.Z - vectorStart.Z);
+
+        private void lab8Task1Button_Click(object sender, EventArgs e)
+        {
+            using (var vectorDialog = new Lab8Task1Vector())
+            {
+                var dialogRes = vectorDialog.ShowDialog();
+
+                if (dialogRes == DialogResult.OK)
+                {
+                    foreach (var figure in figures)
+                    {
+                        var viewVector = new Point3D(vectorDialog.X, vectorDialog.Y, vectorDialog.Z);
+                        var normalVector = new Point3D();
+                        var edgeVector = new Point3D();
+                        bool shouldBeAdded = true;
+                        int idx = 0;
+                        var edgesToRestore = new List<int>();
+                        foreach (var edge in figure.edges)
+                        {
+                            var edgeVectors = new List<Point3D>();
+                            normalVector = VectorFromZeroCoords(figure.vertexes[edge[0]], figure.vertexes[edge[1]]);
+                            edgeVectors.Add(normalVector);
+                            for (int i = 1; i < edge.Count - 1; ++i)
+                            {
+                                edgeVector = VectorFromZeroCoords(figure.vertexes[edge[i]], figure.vertexes[edge[i + 1]]);
+                                shouldBeAdded = true;
+                                foreach (var v in edgeVectors)
+                                {
+                                    var oldAngle = VectorAngle(v, edgeVector) * 180 / Math.PI;
+                                    if (Math.Abs(oldAngle - 180) < 0.1 || Math.Abs(oldAngle - 180) < 0.1)
+                                    {
+                                        shouldBeAdded = false;
+                                        break;
+                                    }
+                                }
+                                if (shouldBeAdded)
+                                {
+                                    normalVector = VectorProduct(normalVector, edgeVector);
+                                    edgeVectors.Add(new Point3D(edgeVector.X, edgeVector.Y, edgeVector.Z));
+                                }
+                            }
+                            edgeVector = VectorFromZeroCoords(figure.vertexes[edge[edge.Count - 1]], figure.vertexes[edge[0]]);
+                            shouldBeAdded = true;
+                            foreach (var v in edgeVectors)
+                            {
+                                var oldAngle = VectorAngle(v, edgeVector) * 180 / Math.PI;
+                                if (Math.Abs(oldAngle - 180) < 0.1 || Math.Abs(oldAngle - 180) < 0.1)
+                                {
+                                    shouldBeAdded = false;
+                                    break;
+                                }
+                            }
+                            if (shouldBeAdded)
+                            {
+                                normalVector = VectorProduct(normalVector, edgeVector);
+                                edgeVectors.Add(new Point3D(edgeVector.X, edgeVector.Y, edgeVector.Z));
+                            }
+                            normalVector = FixNormal(edge, figure, normalVector);
+                            if (!RemoveEdgeIfAngleIsBig(edge, figure, normalVector, viewVector))
+                                edgesToRestore.Add(idx);
+                            ++idx;
+                        }
+                        foreach (var edgeIdx in edgesToRestore)
+                            RestoreEdge(figure.edges[edgeIdx], figure);
+                    }
+                }
+            }
+        }
+
+        private Point3D FixNormal(List<int> edge, Polyhedron polyhedron, Point3D normal)
+        {
+            var newNormalStart = polyhedron.vertexes[edge[0]];
+            var newNormalEnd = new Point3D(normal.X + newNormalStart.X, normal.Y + newNormalStart.Y, normal.Z + newNormalStart.Z);
+            var normalDx = newNormalEnd.X - newNormalStart.X;
+            var normalDy = newNormalEnd.Y - newNormalStart.Y;
+            var normalDz = newNormalEnd.Z - newNormalStart.Z;
+            var normalLength = Math.Sqrt(normalDx * normalDx + normalDy * normalDy + normalDz * normalDz);
+            var stepLength = 1.0 / normalLength;
+            var nextNormalPoint = new Point3D(newNormalStart.X + normalDx * stepLength, newNormalStart.Y + normalDy * stepLength,
+                newNormalStart.Z + normalDz * stepLength);
+            if (SecondPointIsCloser(polyhedron.Centre, newNormalStart, nextNormalPoint))
+                return new Point3D(-1 * normal.X, -1 * normal.Y, -1 * normal.Z);
+            return normal;
+        }
+
+        private bool SecondPointIsCloser(Point3D point1, Point3D point2, Point3D point3)
+        {
+            var p2ToP1Dx = point2.X - point1.X;
+            var p2ToP1Dy = point2.Y - point1.Y;
+            var p2ToP1Dz = point2.Z - point1.Z;
+            var p2ToP1Dist = Math.Sqrt(p2ToP1Dx * p2ToP1Dx + p2ToP1Dy * p2ToP1Dy + p2ToP1Dz * p2ToP1Dz);
+
+            var p3ToP1Dx = point3.X - point1.X;
+            var p3ToP1Dy = point3.Y - point1.Y;
+            var p3ToP1Dz = point3.Z - point1.Z;
+            var p3ToP1Dist = Math.Sqrt(p3ToP1Dx * p3ToP1Dx + p3ToP1Dy * p3ToP1Dy + p3ToP1Dz * p3ToP1Dz);
+
+            return p3ToP1Dist < p2ToP1Dist;
+        }
+
+        /*
+         * full_len = |B - A| // длина вектора, соединяющего две точки == длина отрезка
+C = A + (B - A) * (len / full_len)
+         * */
+
+        private void RestoreEdge(List<int> edge, Polyhedron polyhedron)
+        {
+            for (int i = 0; i < edge.Count - 1; ++i)
+            {
+                polyhedron.vertexes[edge[i]].Neighbours.Add(polyhedron.vertexes[edge[i + 1]]);
+                polyhedron.vertexes[edge[i + 1]].Neighbours.Add(polyhedron.vertexes[edge[i]]);
+            }
+            polyhedron.vertexes[edge[0]].Neighbours.Add(polyhedron.vertexes[edge[edge.Count - 1]]);
+            polyhedron.vertexes[edge[edge.Count - 1]].Neighbours.Add(polyhedron.vertexes[edge[0]]);
+        }
+
+        private bool RemoveEdgeIfAngleIsBig(List<int> edge, Polyhedron polyhedron, Point3D normalVector, Point3D pointOfViewVector)
+        {
+            var angle = VectorAngle(pointOfViewVector, normalVector) * 180 / Math.PI;
+            if (angle >= 90 && angle <= 270)
+            {
+                for (int i = 0; i < edge.Count - 1; ++i)
+                {
+                    polyhedron.vertexes[edge[i]].Neighbours = polyhedron.vertexes[edge[i]].Neighbours
+                        .Where(p => p.X != polyhedron.vertexes[edge[i + 1]].X || p.Y != polyhedron.vertexes[edge[i + 1]].Y
+                        || p.Z != polyhedron.vertexes[edge[i + 1]].Z).ToList();
+                    polyhedron.vertexes[edge[i + 1]].Neighbours = polyhedron.vertexes[edge[i + 1]].Neighbours
+                        .Where(p => p.X != polyhedron.vertexes[edge[i]].X || p.Y != polyhedron.vertexes[edge[i]].Y
+                        || p.Z != polyhedron.vertexes[edge[i]].Z).ToList();
+                }
+                polyhedron.vertexes[edge[0]].Neighbours = polyhedron.vertexes[edge[0]].Neighbours
+                        .Where(p => p.X != polyhedron.vertexes[edge[edge.Count - 1]].X || p.Y != polyhedron.vertexes[edge[edge.Count - 1]].Y
+                        || p.Z != polyhedron.vertexes[edge[edge.Count - 1]].Z).ToList();
+                polyhedron.vertexes[edge[edge.Count - 1]].Neighbours = polyhedron.vertexes[edge[edge.Count - 1]].Neighbours
+                    .Where(p => p.X != polyhedron.vertexes[edge[0]].X || p.Y != polyhedron.vertexes[edge[0]].Y
+                    || p.Z != polyhedron.vertexes[edge[0]].Z).ToList();
+                return true;
+            }
+            else
+                return false;
+        }
+
+        private double VectorAngle(Point3D vector1, Point3D vector2)
+        {
+            double v1Length = Math.Sqrt(vector1.X * vector1.X + vector1.Y * vector1.Y + vector1.Z * vector1.Z);
+            double v2Length = Math.Sqrt(vector2.X * vector2.X + vector2.Y * vector2.Y + vector2.Z * vector2.Z);
+            double cos = (vector1.X * vector2.X + vector1.Y * vector2.Y + vector1.Z * vector2.Z) / (v1Length * v2Length);
+            return Math.Acos(cos);
+        }
     }
 }

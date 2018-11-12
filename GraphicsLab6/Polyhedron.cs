@@ -39,10 +39,12 @@ namespace GraphicsLab6
         public int SegmentLength;
         public List<Point3D> vertexes;
         public Point3D Centre { get; private set; }
-        public List<Edge> edges;
+        public List<Edge> Edges;
+        public List<List<int>> edges;
 
         public Polyhedron(PolyhedronType type, int len)
         {
+            edges = new List<List<int>>();
             var ss = SchlafliSymbol.schlafliSymbol[type.ToString()];
             CountVertex = 4 * ss.Item1 / (4 - (ss.Item1 - 2) * (ss.Item2 - 2));
             CountSegment = ss.Item2 * CountVertex / 2;
@@ -75,18 +77,6 @@ namespace GraphicsLab6
             var nSquared = n * n;
             var cosAngle = Math.Round(Math.Cos(angle), 3);
             var sinAngle = Math.Round(Math.Sin(angle), 3);
-
-            //fixing sine and cosine
-            /*#region fixdoubles
-            if (Math.Abs(cosAngle - 1) < 0.00001)
-                cosAngle = 1;
-            if (Math.Abs(cosAngle) < 0.00001)
-                cosAngle = 0;
-            if (Math.Abs(sinAngle - 1) < 0.00001)
-                sinAngle = 1;
-            if (Math.Abs(sinAngle) < 0.00001)
-                sinAngle = 0;
-            #endregion*/
 
             var rotateMatrix = new List<List<double>>
             {
@@ -127,6 +117,10 @@ namespace GraphicsLab6
         #region tetrahedron
         private void BuildTetrahedron(int len)
         {
+            edges.Add(new List<int>() { 0, 1, 2 });
+            edges.Add(new List<int>() { 0, 1, 3 });
+            edges.Add(new List<int>() { 0, 2, 3 });
+            edges.Add(new List<int>() { 1, 3, 2 });
             vertexes.Add(new Point3D(0, 0, 0));
             vertexes.Add(new Point3D(len, 0, 0));
             vertexes.Add(new Point3D(len / 2, len * Math.Sqrt(3) / 2, 0));
@@ -150,6 +144,13 @@ namespace GraphicsLab6
         #region hexahedron
         private void BuildHexahedron(int len)
         {
+            edges.Add(new List<int>() { 0, 1, 3, 2 });
+            edges.Add(new List<int>() { 0, 1, 5, 4 });
+            edges.Add(new List<int>() { 0, 4, 6, 2 });
+            edges.Add(new List<int>() { 2, 6, 7, 3 });
+            edges.Add(new List<int>() { 1, 5, 7, 3 });
+            edges.Add(new List<int>() { 5, 4, 6, 7 });
+
             vertexes.Add(new Point3D(0, 0, 0));
             vertexes.Add(new Point3D(len, 0, 0));
             vertexes.Add(new Point3D(0, len, 0));
@@ -190,6 +191,15 @@ namespace GraphicsLab6
         #region octahedron
         private void BuildOctahedron(int len)
         {
+            edges.Add(new List<int>() { 0, 2, 5 });
+            edges.Add(new List<int>() { 0, 3, 5 });
+            edges.Add(new List<int>() { 3, 1, 5 });
+            edges.Add(new List<int>() { 1, 2, 5 });
+            edges.Add(new List<int>() { 0, 2, 4 });
+            edges.Add(new List<int>() { 0, 3, 4 });
+            edges.Add(new List<int>() { 3, 1, 4 });
+            edges.Add(new List<int>() { 1, 2, 4 });
+
             float shift = (float)(len * Math.Sqrt(2) / 2);
             vertexes.Add(new Point3D(shift, 0, 0));
             vertexes.Add(new Point3D(-shift, 0, 0));
