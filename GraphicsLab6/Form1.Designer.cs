@@ -39,8 +39,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.button3 = new System.Windows.Forms.Button();
             this.lab8Task1Button = new System.Windows.Forms.Button();
-            this.lab8Task2Button = new System.Windows.Forms.Button();
             this.lab8Task3Button = new System.Windows.Forms.Button();
+            this.checkBoxLab8task2 = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -162,15 +162,7 @@
             this.lab8Task1Button.TabIndex = 11;
             this.lab8Task1Button.Text = "lab8Task1";
             this.lab8Task1Button.UseVisualStyleBackColor = true;
-            // 
-            // lab8Task2Button
-            // 
-            this.lab8Task2Button.Location = new System.Drawing.Point(1093, 234);
-            this.lab8Task2Button.Name = "lab8Task2Button";
-            this.lab8Task2Button.Size = new System.Drawing.Size(75, 23);
-            this.lab8Task2Button.TabIndex = 12;
-            this.lab8Task2Button.Text = "lab8Task2";
-            this.lab8Task2Button.UseVisualStyleBackColor = true;
+            this.lab8Task1Button.Click += new System.EventHandler(this.lab8Task1Button_Click);
             // 
             // lab8Task3Button
             // 
@@ -182,13 +174,24 @@
             this.lab8Task3Button.UseVisualStyleBackColor = true;
             this.lab8Task3Button.Click += new System.EventHandler(this.lab8Task3Button_Click);
             // 
+            // checkBoxLab8task2
+            // 
+            this.checkBoxLab8task2.AutoSize = true;
+            this.checkBoxLab8task2.Location = new System.Drawing.Point(1094, 227);
+            this.checkBoxLab8task2.Name = "checkBoxLab8task2";
+            this.checkBoxLab8task2.Size = new System.Drawing.Size(63, 17);
+            this.checkBoxLab8task2.TabIndex = 14;
+            this.checkBoxLab8task2.Text = "Z-buffer";
+            this.checkBoxLab8task2.UseVisualStyleBackColor = true;
+            this.checkBoxLab8task2.CheckedChanged += new System.EventHandler(this.checkBoxLab8task2_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1238, 514);
+            this.Controls.Add(this.checkBoxLab8task2);
             this.Controls.Add(this.lab8Task3Button);
-            this.Controls.Add(this.lab8Task2Button);
             this.Controls.Add(this.lab8Task1Button);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.label2);
@@ -221,8 +224,8 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button lab8Task1Button;
-        private System.Windows.Forms.Button lab8Task2Button;
         private System.Windows.Forms.Button lab8Task3Button;
+        private System.Windows.Forms.CheckBox checkBoxLab8task2;
     }
 }
 

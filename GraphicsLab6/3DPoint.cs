@@ -55,7 +55,7 @@ namespace GraphicsLab6
             Z = newHomogeneousCoords[2] / divideBy;
             //return new Point3D(newHomogeneousCoords[0] / divideBy, newHomogeneousCoords[1] / divideBy, newHomogeneousCoords[2] / divideBy);
         }
-
+      
         public void MultiplyByMatrixTask8(List<List<double>> matrix)
         {
             var homogeneousCoords = new List<double> { X, Y, Z, 1 };
@@ -73,6 +73,11 @@ namespace GraphicsLab6
             yN = newHomogeneousCoords[1] / divideBy;
             zN = newHomogeneousCoords[2] / divideBy;
             //return new Point3D(newHomogeneousCoords[0] / divideBy, newHomogeneousCoords[1] / divideBy, newHomogeneousCoords[2] / divideBy);
+        }
+      
+        internal Point3D Copy()
+        {
+            return new Point3D(X, Y, Z);
         }
     }
 }

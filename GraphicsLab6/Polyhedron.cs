@@ -16,7 +16,7 @@ namespace GraphicsLab6
         Dodecahedron
     };
 
-    public static class SchlafliSymbol
+   public static class SchlafliSymbol
     {
         static public Dictionary<string, Tuple<int, int>> schlafliSymbol = new Dictionary<string, Tuple<int, int>>
         {
@@ -41,9 +41,13 @@ namespace GraphicsLab6
         private Polyhedron figure;
 
         public Point3D Centre { get; set; }
+        public List<Edge> Edges;
+        public List<List<int>> edges;
 
         public Polyhedron(PolyhedronType type, int len)
         {
+            edges = new List<List<int>>();
+            Edges = new List<Edge>();
             var ss = SchlafliSymbol.schlafliSymbol[type.ToString()];
             CountVertex = 4 * ss.Item1 / (4 - (ss.Item1 - 2) * (ss.Item2 - 2));
             CountSegment = ss.Item2 * CountVertex / 2;
@@ -81,18 +85,6 @@ namespace GraphicsLab6
             var nSquared = n * n;
             var cosAngle = Math.Round(Math.Cos(angle), 3);
             var sinAngle = Math.Round(Math.Sin(angle), 3);
-
-            //fixing sine and cosine
-            /*#region fixdoubles
-            if (Math.Abs(cosAngle - 1) < 0.00001)
-                cosAngle = 1;
-            if (Math.Abs(cosAngle) < 0.00001)
-                cosAngle = 0;
-            if (Math.Abs(sinAngle - 1) < 0.00001)
-                sinAngle = 1;
-            if (Math.Abs(sinAngle) < 0.00001)
-                sinAngle = 0;
-            #endregion*/
 
             var rotateMatrix = new List<List<double>>
             {
@@ -133,6 +125,10 @@ namespace GraphicsLab6
         #region tetrahedron
         private void BuildTetrahedron(int len)
         {
+            edges.Add(new List<int>() { 0, 1, 2 });
+            edges.Add(new List<int>() { 0, 1, 3 });
+            edges.Add(new List<int>() { 0, 2, 3 });
+            edges.Add(new List<int>() { 1, 3, 2 });
             vertexes.Add(new Point3D(0, 0, 0));
             vertexes.Add(new Point3D(len, 0, 0));
             vertexes.Add(new Point3D(len / 2, len * Math.Sqrt(3) / 2, 0));
@@ -150,12 +146,26 @@ namespace GraphicsLab6
                 (vertexes[0].Y + vertexes[1].Y + vertexes[2].Y + vertexes[3].Y) / 4,
                 (vertexes[0].Z + vertexes[1].Z + vertexes[2].Z + vertexes[3].Z) / 4
                 );
+            Edges = new List<Edge>
+            {
+                new Edge(new List<Point3D>{vertexes[0], vertexes[1], vertexes[2]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[1], vertexes[3]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[2], vertexes[3]}),
+                new Edge(new List<Point3D>{vertexes[1], vertexes[3], vertexes[2] })
+            };
         }
         #endregion
 
         #region hexahedron
         private void BuildHexahedron(int len)
         {
+            edges.Add(new List<int>() { 0, 1, 3, 2 });
+            edges.Add(new List<int>() { 0, 1, 5, 4 });
+            edges.Add(new List<int>() { 0, 4, 6, 2 });
+            edges.Add(new List<int>() { 2, 6, 7, 3 });
+            edges.Add(new List<int>() { 1, 5, 7, 3 });
+            edges.Add(new List<int>() { 5, 4, 6, 7 });
+
             vertexes.Add(new Point3D(0, 0, 0));
             vertexes.Add(new Point3D(len, 0, 0));
             vertexes.Add(new Point3D(0, len, 0));
@@ -188,22 +198,32 @@ namespace GraphicsLab6
                 vertexes[i].AddNeighbour(vertexes[i + 4]);
                 vertexes[i + 4].AddNeighbour(vertexes[i]);
             }
-            double xSum = 0;
-            double ySum = 0;
-            double zSum = 0;
-            foreach(var item in vertexes)
+
+            Centre = new Point3D(len / 2, len / 2, len / 2);
+            Edges = new List<Edge>
             {
-                xSum += item.X;
-                ySum += item.Y;
-                zSum += item.Z;
-            }
-            Centre = new Point3D(xSum / 8, ySum / 8, zSum / 8);
+                new Edge(new List<Point3D>{vertexes[0], vertexes[1], vertexes[3], vertexes[2]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[1], vertexes[5], vertexes[4]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[4], vertexes[6], vertexes[2]}),
+                new Edge(new List<Point3D>{vertexes[2], vertexes[6], vertexes[7], vertexes[3]}),
+                new Edge(new List<Point3D>{vertexes[1], vertexes[5], vertexes[7], vertexes[3]}),
+                new Edge(new List<Point3D>{vertexes[5], vertexes[4], vertexes[6], vertexes[7]}),
+            };
         }
         #endregion
 
         #region octahedron
         private void BuildOctahedron(int len)
         {
+            edges.Add(new List<int>() { 0, 2, 5 });
+            edges.Add(new List<int>() { 0, 3, 5 });
+            edges.Add(new List<int>() { 3, 1, 5 });
+            edges.Add(new List<int>() { 1, 2, 5 });
+            edges.Add(new List<int>() { 0, 2, 4 });
+            edges.Add(new List<int>() { 0, 3, 4 });
+            edges.Add(new List<int>() { 3, 1, 4 });
+            edges.Add(new List<int>() { 1, 2, 4 });
+
             float shift = (float)(len * Math.Sqrt(2) / 2);
             vertexes.Add(new Point3D(shift, 0, 0));
             vertexes.Add(new Point3D(-shift, 0, 0));
@@ -218,6 +238,17 @@ namespace GraphicsLab6
                         || vertex1.Z == 0 && vertex2.Z != 0  )
                         vertex1.AddNeighbour(vertex2);
             Centre = new Point3D(0, 0, 0);
+            Edges = new List<Edge>
+            {
+                new Edge(new List<Point3D>{vertexes[0], vertexes[2], vertexes[5]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[3], vertexes[5]}),
+                new Edge(new List<Point3D>{vertexes[3], vertexes[1], vertexes[5]}),
+                new Edge(new List<Point3D>{vertexes[1], vertexes[2], vertexes[5]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[2], vertexes[4]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[3], vertexes[4]}),
+                new Edge(new List<Point3D>{vertexes[3], vertexes[1], vertexes[4]}),
+                new Edge(new List<Point3D>{vertexes[1], vertexes[2], vertexes[4]}),
+            };
         }
         #endregion
     }
