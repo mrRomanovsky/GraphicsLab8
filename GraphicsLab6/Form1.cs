@@ -17,15 +17,20 @@ namespace GraphicsLab6
     {
         private string figType = "";
         private string mode = "";
-        private List<Polyhedron> figures;
+
+        public Polyhedron figure;
         private Pen redPen = new Pen(Color.Red);
         private List<System.Windows.Forms.Panel> tasksPanels;
+        private Edge polyhrdron2D;
+        public Size pictureBox1Size;
+        private List<Polyhedron> figures;
 
         public Form1()
         {
             InitializeComponent();
             pictureBox1.Image = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             tasksPanels = new List<Panel>(7);
+            pictureBox1Size = pictureBox1.Size;
             figures = new List<Polyhedron>();
             InitializeTasksPanels();
         }
@@ -96,6 +101,29 @@ namespace GraphicsLab6
             }
         }
 
+        public void DrawPolyhedronLab8(Polyhedron polyhedron, Size size)
+        {
+            pictureBox1.Image = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            var x = size.Width / 2 - polyhedron.SegmentLength / 2;
+            var y = size.Height / 2 - polyhedron.SegmentLength / 2;
+            var z = 1.0;
+
+            using (var g = Graphics.FromImage(pictureBox1.Image))
+            {
+                foreach (var item in polyhedron.vertexes)
+                {
+                    if (item.zN != 0)
+                        z = item.zN;
+                    var scaledPoint = new PointF((float)(item.xN / z + x), (float)(item.yN / z) + y);
+                    foreach (var neighbour in item.Neighbours)
+                    {
+                        var scaledNeighbour = new PointF((float)((float)neighbour.xN / (float)z + x), (float)((float)neighbour.yN / (float)z) + y);
+                        g.DrawLine(redPen, scaledPoint, scaledNeighbour);
+                    }
+                }
+            }
+        }
+
         private void DrawPolyhedronYOZ(List<Polyhedron> polyhedrons, Size size)
         {
             pictureBox1.Image = new Bitmap(pictureBox1.Width, pictureBox1.Height);
@@ -161,7 +189,7 @@ namespace GraphicsLab6
                     }
                 }
             }
-
+            pictureBox1.Invalidate();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -967,6 +995,12 @@ namespace GraphicsLab6
                 }
             }
         }
+        private void lab8Task3Button_Click(object sender, EventArgs e)
+        {
+            var f = new Lab8Task3(this);
+            f.Show();
+        }
+        
         #endregion
 
         #region lab8

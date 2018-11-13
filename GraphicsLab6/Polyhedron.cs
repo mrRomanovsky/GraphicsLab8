@@ -38,7 +38,9 @@ namespace GraphicsLab6
         public PointF CentrePoint;
         public int SegmentLength;
         public List<Point3D> vertexes;
-        public Point3D Centre { get; private set; }
+        private Polyhedron figure;
+
+        public Point3D Centre { get; set; }
         public List<Edge> Edges;
         public List<List<int>> edges;
 
@@ -65,6 +67,11 @@ namespace GraphicsLab6
                     BuildOctahedron(len);
                     break;
             }
+        }
+
+        public Polyhedron(Polyhedron figure)
+        {
+            
         }
 
         //angle - в радианах!
