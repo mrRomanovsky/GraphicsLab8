@@ -69,6 +69,7 @@ namespace GraphicsLab6
             if (checkBoxLab8task2.Checked)
             {
                 ZBuffer("xoy");
+                return;
             }
             foreach (var polyhedron in polyhedrons)
             {
@@ -101,6 +102,7 @@ namespace GraphicsLab6
             if (checkBoxLab8task2.Checked)
             {
                 ZBuffer("yoz");
+                return;
             }
             foreach (var polyhedron in polyhedrons)
             {
@@ -134,6 +136,7 @@ namespace GraphicsLab6
             if (checkBoxLab8task2.Checked)
             {
                 ZBuffer("xoz");
+                return;
             }
             foreach (var polyhedron in polyhedrons)
             {
@@ -165,7 +168,7 @@ namespace GraphicsLab6
         {
             pictureBox1.Image = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             figures = new List<Polyhedron>();
-            figType = "";
+           // figType = "";
             mode = "";
         }
 
@@ -225,8 +228,12 @@ namespace GraphicsLab6
                     pictureBox1.Invalidate();
                     break;
                 case "Задание 9 XOY":
+                    if (checkBoxLab8task2.Checked)
+                    {
+                        ZBuffer("xoy");
+                        return;
+                    }
                     var ortXOY = new List<List<double>> { new List<double> { 1, 0, 0, 0 }, new List<double> { 0, 1, 0, 0 }, new List<double> { 0, 0, 0, 0 }, new List<double> { 0, 0, 0, 1 } };
-
                     foreach (var figure in figures)
                     {
                         foreach (var item in figure.vertexes)
@@ -236,6 +243,11 @@ namespace GraphicsLab6
                     pictureBox1.Invalidate();
                     break;
                 case "Задание 9 XOZ":
+                    if (checkBoxLab8task2.Checked)
+                    {
+                        ZBuffer("xoz");
+                        return;
+                    }
                     var ortXOZ = new List<List<double>> { new List<double> { 1, 0, 0, 0 }, new List<double> { 0, 0, 0, 0 }, new List<double> { 0, 0, 1, 0 }, new List<double> { 0, 0, 0, 1 } };
 
                     foreach (var figure in figures)
@@ -247,6 +259,11 @@ namespace GraphicsLab6
                     pictureBox1.Invalidate();
                     break;
                 case "Задание 9 YOZ":
+                    if (checkBoxLab8task2.Checked)
+                    {
+                        ZBuffer("yoz");
+                        return;
+                    }
                     var ortYOZ = new List<List<double>> { new List<double> { 0, 0, 0, 0 }, new List<double> { 0, 1, 0, 0 }, new List<double> { 0, 0, 1, 0 }, new List<double> { 0, 0, 0, 1 } };
 
                     foreach (var figure in figures)
@@ -961,6 +978,13 @@ namespace GraphicsLab6
             b = c;
         }
 
+        void Swap(ref double a, ref double b)
+        {
+            double c = a;
+            a = b;
+            b = c;
+        }
+
         void line(int x0, int y0, int x1, int y1, Bitmap image, Color color)
         {
             bool steep = false;
@@ -1029,23 +1053,271 @@ namespace GraphicsLab6
         private void SetColorForZBuffer(double[,] zbuffer, double min, double max)
         {
             var bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-            var skale = 255 / (max - min);
+            double skale;
+            if (max - min == 0)
+                skale = 1;
+            else
+                skale = 255 / (max - min);
             for (int i = 0; i < pictureBox1.Width; i++)
             {
                 for (int j = 0; j < pictureBox1.Height; j++)
                 {
-                    if (zbuffer[i, j] == double.MinValue)
+                    if (zbuffer[i, j] == double.MaxValue || zbuffer[i, j] == double.MinValue)
                         bitmap.SetPixel(i, j, Color.White);
                     else
                     {
-                        var c = (int)(skale * zbuffer[i, j]);
-                        bitmap.SetPixel(i, j, Color.FromArgb(c, c, c));
+                        var zz = zbuffer[i, j];
+                        var c = (int)(skale * (zbuffer[i, j] - min));
+                        //if (c > 0)
+                        //    // c = (int)(c + (50 * skale + c) % 254);
+                        //    c = Math.Min(100 + c, 254);
+                        bitmap.SetPixel(i, j, Color.FromArgb(c,c,c));
                     }
                 }
             }
             pictureBox1.Image = bitmap;
             pictureBox1.Invalidate();
         }
+
+        void ZbufferForSquare(string plans, Edge e, double [,] zbufer, int x, int y,ref double min, ref double max)
+        {
+            e.GetEquationPlans();
+            double z0, x1, x2, y1, y2, dz_x, dz_y;
+            dz_y = dz_x = z0 = x1 = x2 = y1 = y2 = 0;
+            var leftUpVertex = e.FindLeftUpVertex(plans);
+            var rightDownVertex = e.FindRightDownVertex(plans);
+            switch (plans)
+            {
+                case "xoy":
+                    z0 = e.Vertexes.First().Z;
+                    x1 = rightDownVertex.X;
+                    x2 = leftUpVertex.X;
+                    y1 = rightDownVertex.Y;
+                    y2 = leftUpVertex.Y;
+                    dz_x = e.A / e.C;
+                    dz_y = e.B / e.C;
+                    break;
+                case "yoz":
+                    z0 = e.Vertexes.First().X;
+                    y1 = rightDownVertex.Z;
+                    y2 = leftUpVertex.Z;
+                    x1 = rightDownVertex.Y;
+                    x2 = leftUpVertex.Y;
+                    dz_y = e.C / e.A;
+                    dz_x = e.B / e.A;
+                    break;
+                case "xoz":
+                    z0 = e.Vertexes.First().Y;
+                    x1 = rightDownVertex.X;
+                    x2 = leftUpVertex.X;
+                    y1 = rightDownVertex.Z;
+                    y2 = leftUpVertex.Z;
+                    dz_x = e.A / e.B;
+                    dz_y = e.C / e.B;
+                    break;
+                default:
+                    break;
+            }
+            for (int i = 0; i < (x1- x2); i++)
+            {
+                z0 -= dz_x;
+                for (int j = 0; j < (y1- y2); j++)
+                {
+                    z0 -= dz_y;
+                    var z_tmp = z0;
+                    if (z0 == 0)
+                        z0 = 1;
+                    if (zbufer[(int)((i + (int)x2) / z0 + x), (int)((j + (int)y2) / z0 + y)] < z_tmp)
+                        zbufer[(int)((i + (int)x2) / z0 + x), (int)((j + (int)y2) / z0 + y)] = z_tmp;
+                    if (zbufer[(int)((i + (int)x2) / z0 + x), (int)((j + (int)y2) / z0 + y)] != double.MinValue
+                        && zbufer[(int)((i + (int)x2) / z0 + x), (int)((j + (int)y2) / z0 + y)] < min)
+                        min = zbufer[(int)((i + (int)x2) / z0 + x), (int)((j + (int)y2) / z0 + y)];
+                    if (zbufer[(int)((i + (int)x2) / z0 + x), (int)((j + (int)y2) / z0 + y)] != double.MaxValue
+                        && zbufer[(int)((i + (int)x2) / z0 + x), (int)((j + (int)y2) / z0 + y)] > max)
+                        max = zbufer[(int)((i + (int)x2) / z0 + x), (int)((j + (int)y2) / z0 + y)];
+                    z0 = z_tmp;
+                }
+            }
+        }
+
+        struct Triangle
+        {
+            //public int x1; public int y1; public int x2;
+            //public int y2;
+            //public int x3; public int y3;
+            //public double z1;
+            //public double z2;
+            //public double z3;
+            public Point3D p1;
+            public Point3D p2;
+            public Point3D p3;
+
+
+            public Triangle(string plans, Point3D p1, Point3D p2, Point3D p3)
+            {
+                this.p1 = p1;
+                this.p2 = p2;
+                this.p3 = p3;
+                //if (plans == "xoy")
+                //{
+                //double z = 1;
+                //if (p1.Z != 0)
+                //    z = p1.Z;
+                //x1 = (int)(p1.X / z);
+                //y1 = (int)(p1.Y / z);
+                //z1 = p1.Z;
+                //z = 1;
+                //if (p2.Z != 0)
+                //    z = p2.Z;
+                //x2 = (int)(p2.X / z);
+                //y2 = (int)(p2.Y / z);
+                //z = 1;
+                //z2 = p2.Z;
+                //if (p3.Z != 0)
+                //    z = p3.Z;
+                //z3 = p3.Z;
+                //x3 = (int)(p3.X / z);
+                //y3 = (int)(p3.Y / z);
+                //}
+            }
+
+            internal Triangle Copy()
+            {
+                return new Triangle("xoy", p1.Copy(), p2.Copy(), p3.Copy());
+            }
+        }
+
+        void ZbufferForTriangle(List<Triangle> triangles, double[,] zbufer, int x, int y, ref double min, ref double max)
+        {
+            foreach (var triangle in triangles)
+            {
+                var t = triangle.Copy();
+                if (t.p2.Y < t.p1.Y)
+                {
+                    Swap(ref t.p1.Y, ref t.p2.Y);
+                    Swap(ref t.p1.X, ref t.p2.X);
+                } // точки p1, p2 упорядочены
+                if (t.p3.Y < t.p1.Y)
+                {
+                    Swap(ref t.p1.Y, ref t.p3.Y);
+                    Swap(ref t.p1.X, ref t.p3.X);
+                } // точки p1, p3 упорядочены
+                if (t.p2.Y > t.p3.Y)
+                {
+                    Swap(ref t.p2.Y, ref t.p3.Y);
+                    Swap(ref t.p2.X, ref t.p3.X);
+                }
+
+                double dx13 = 0, dx12 = 0, dx23 = 0;
+                if (t.p3.Y != t.p1.Y)
+                {
+                    dx13 = (t.p3.X - t.p1.X);
+                    dx13 /= t.p3.Y - t.p1.Y;
+                }
+                else
+                    dx13 = 0;
+                if (t.p2.Y != t.p1.Y)
+                {
+                    dx12 = (t.p2.X - t.p1.X);
+                    dx12 /= (t.p2.Y - t.p1.Y);
+                }
+                else
+                    dx12 = 0;
+                if (t.p3.Y != t.p2.Y)
+                {
+                    dx23 = (t.p3.X - t.p2.X);
+                    dx23 /= (t.p3.Y - t.p2.Y);
+                }
+                else
+                    dx23 = 0;
+                var wx1 = t.p1.X;
+                var wx2 = wx1;
+                var _dx13 = dx13;
+
+                if (dx13 > dx12)
+                    Swap(ref dx13, ref dx12);
+
+                var e = new Edge(new List<Point3D> { t.p1, t.p2, t.p3 });
+                e.GetEquationPlans();
+                var z0 = t.p1.Z;
+                var c = 1.0;
+                if (e.C != 0)
+                    c = e.C;
+                var dz_x = (double)e.A / (double)c;
+                var dz_y = (double)e.B / (double)c;
+
+                // растеризуем верхний полутреугольник
+                for (int j = (int)t.p1.Y; j < t.p2.Y; j++)
+                {
+                    z0 -= dz_y;
+                    for (int i = (int)wx1; i <= wx2; i++)
+                    {
+                    z0 -= dz_x;
+                        var z_tmp = z0;
+                        //if (z0 == 0)
+                        //{
+                            z0 = 1;
+                        //}
+                        var zz = zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)];
+                        if (zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)] < z0)
+                            zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)] = z_tmp;
+                        if (zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)] != double.MinValue
+                            && zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)] < min)
+                        {
+                            min = zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)];
+                        }
+                        if (zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)] != double.MaxValue
+                            && zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)] > max)
+                            max = zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)];
+                        z0 = z_tmp;
+                    }
+                    wx1 += dx13;
+                    wx2 += dx12;
+                }
+                if (t.p1.Y == t.p2.Y)
+                {
+                    wx1 = (t.p1.X);
+                    wx2 = (t.p2.X);
+                }
+                if (_dx13 < dx23)
+                {
+                    Swap(ref _dx13, ref dx23);
+                }
+                z0 = t.p2.Z;
+
+                // растеризуем нижний полутреугольник
+                for (int j = (int)t.p2.Y; j <= t.p3.Y; j++)
+                {
+                    z0 -= dz_y;
+                    for (int i = (int)(wx1); i <= (wx2); i++)
+                    {
+                        z0 -= dz_x;
+                        // SetPixel(hdc, j, i, 0);
+                       var z_tmp = z0;
+                        //if (z0 == 0)
+                        //{
+                            z0 = 1;
+                       // }
+                        var zz = zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)];
+                        if (zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)] < z_tmp)
+                            zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)] = z_tmp;
+                        if (zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)] != double.MinValue
+                            && zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)] < min)
+                        {
+                            min = zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)];
+                            if (min < -360)
+                                z0 *= 1;
+                        }
+                            if (zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)] != double.MaxValue
+                            && zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)] > max)
+                            max = zbufer[(int)((i) / z0 + x), (int)((j) / z0 + y)];
+                        z0 = z_tmp;
+                    }
+                    wx1 += _dx13;
+                    wx2 += dx23;
+                }
+        }
+    }
 
         private void ZBuffer(string plans)
         {
@@ -1063,27 +1335,23 @@ namespace GraphicsLab6
             }
             foreach (var figure in figures)
             {
+                var x = pictureBox1.Width / 2 - figure.SegmentLength / 2;
+                var y = pictureBox1.Height / 2 - figure.SegmentLength / 2;
+                int i = 0;
                 foreach (var e in figure.Edges)
                 {
-                    e.GetEquationPlans();
-                    var z0 = e.Vertexes.First().Z;
-                    var dz_x = e.A / e.C;
-                    var dz_y = e.B / e.C;
-                    var leftUpVertex = e.FindLeftUpVertex("xoy");
-                    var rightDownVertex = e.FindRightDownVertex("xoy");
-                    for (int i = 0; i < (rightDownVertex.X - leftUpVertex.X); i++)
+                    if (figure.Type == PolyhedronType.Hexahedron)
+                        ZbufferForSquare(plans, e, zbufer, x, y, ref min, ref max);
+                    else if (figure.Type == PolyhedronType.Tetrahedron)
+                        ZbufferForTriangle(new List<Triangle> { new Triangle("xoy", e.Vertexes[0], e.Vertexes[1], e.Vertexes[2]) }, zbufer, x, y, ref min, ref max);
+                    
+                    else
                     {
-                        z0 -= dz_x;
-                        for (int j = 0; j < (rightDownVertex.Y - leftUpVertex.Y); j++)
-                        {
-                            z0 -= dz_y;
-                            if (zbufer[i + (int)leftUpVertex.X, j  + (int)leftUpVertex.Y] < z0)
-                                zbufer[i + (int)leftUpVertex.X, j + (int)leftUpVertex.Y] = z0;
-                            if (zbufer[i + (int)leftUpVertex.X, j + (int)leftUpVertex.Y] != double.MinValue && zbufer[i + (int)leftUpVertex.X, j + (int)leftUpVertex.Y] < min)
-                                min = zbufer[i + (int)leftUpVertex.X, j + (int)leftUpVertex.Y];
-                            if (zbufer[i + (int)leftUpVertex.X, j + (int)leftUpVertex.Y] > max)
-                                max = zbufer[i + (int)leftUpVertex.X, j + (int)leftUpVertex.Y];
-                        }
+                        //var upperVertex = e.Vertexes.OrderBy(p => p.Y).First();
+                        //var downVertex = e.Vertexes.OrderBy(p => -p.Y).First();
+                        //var leftVertex = e.Vertexes.OrderBy(p => p.X).First();
+                        //var rightVertex = e.Vertexes.OrderBy(p => -p.X).First();
+                        ZbufferForTriangle(new List<Triangle> { new Triangle("xoy", e.Vertexes[0], e.Vertexes[1], e.Vertexes[2]) }, zbufer, x, y, ref min, ref max);
                     }
                 }
             }

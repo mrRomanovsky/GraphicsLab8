@@ -45,6 +45,7 @@ namespace GraphicsLab6
         public Polyhedron(PolyhedronType type, int len)
         {
             edges = new List<List<int>>();
+            Edges = new List<Edge>();
             var ss = SchlafliSymbol.schlafliSymbol[type.ToString()];
             CountVertex = 4 * ss.Item1 / (4 - (ss.Item1 - 2) * (ss.Item2 - 2));
             CountSegment = ss.Item2 * CountVertex / 2;
@@ -138,6 +139,13 @@ namespace GraphicsLab6
                 (vertexes[0].Y + vertexes[1].Y + vertexes[2].Y + vertexes[3].Y) / 4,
                 (vertexes[0].Z + vertexes[1].Z + vertexes[2].Z + vertexes[3].Z) / 4
                 );
+            Edges = new List<Edge>
+            {
+                new Edge(new List<Point3D>{vertexes[0], vertexes[1], vertexes[2]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[1], vertexes[3]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[2], vertexes[3]}),
+                new Edge(new List<Point3D>{vertexes[1], vertexes[3], vertexes[2] })
+            };
         }
         #endregion
 
@@ -185,6 +193,15 @@ namespace GraphicsLab6
             }
 
             Centre = new Point3D(len / 2, len / 2, len / 2);
+            Edges = new List<Edge>
+            {
+                new Edge(new List<Point3D>{vertexes[0], vertexes[1], vertexes[3], vertexes[2]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[1], vertexes[5], vertexes[4]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[4], vertexes[6], vertexes[2]}),
+                new Edge(new List<Point3D>{vertexes[2], vertexes[6], vertexes[7], vertexes[3]}),
+                new Edge(new List<Point3D>{vertexes[1], vertexes[5], vertexes[7], vertexes[3]}),
+                new Edge(new List<Point3D>{vertexes[5], vertexes[4], vertexes[6], vertexes[7]}),
+            };
         }
         #endregion
 
@@ -214,6 +231,17 @@ namespace GraphicsLab6
                         || vertex1.Z == 0 && vertex2.Z != 0  )
                         vertex1.AddNeighbour(vertex2);
             Centre = new Point3D(0, 0, 0);
+            Edges = new List<Edge>
+            {
+                new Edge(new List<Point3D>{vertexes[0], vertexes[2], vertexes[5]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[3], vertexes[5]}),
+                new Edge(new List<Point3D>{vertexes[3], vertexes[1], vertexes[5]}),
+                new Edge(new List<Point3D>{vertexes[1], vertexes[2], vertexes[5]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[2], vertexes[4]}),
+                new Edge(new List<Point3D>{vertexes[0], vertexes[3], vertexes[4]}),
+                new Edge(new List<Point3D>{vertexes[3], vertexes[1], vertexes[4]}),
+                new Edge(new List<Point3D>{vertexes[1], vertexes[2], vertexes[4]}),
+            };
         }
         #endregion
     }

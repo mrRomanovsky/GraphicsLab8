@@ -29,7 +29,7 @@ namespace GraphicsLab6
             {
                 return Vertexes.OrderBy(p => order * p.X).ThenBy(p => order * p.Y).First();
             }
-            if (plans == "zoy")
+            if (plans == "yoz")
             {
                 return Vertexes.OrderBy(p => order * p.Y).ThenBy(p => order * p.Z).First();
             }

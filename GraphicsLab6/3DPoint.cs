@@ -53,5 +53,9 @@ namespace GraphicsLab6
             //return new Point3D(newHomogeneousCoords[0] / divideBy, newHomogeneousCoords[1] / divideBy, newHomogeneousCoords[2] / divideBy);
         }
 
+        internal Point3D Copy()
+        {
+            return new Point3D(X, Y, Z);
+        }
     }
 }
